@@ -2,6 +2,9 @@
 
 A sleek, **React-based calendar application** featuring seasonal themes, dual-view scheduling, and full note-management capabilities.
 
+## Live Demo 🚀
+[![Live Demo](https://img.shields.io/badge/Live-Demo-green)](https://calendar-indol-xi.vercel.app/)
+
 ## ✨ Key Features
 ### 🎨 Visuals & Customization
 - Seasonal Themes: Automatically updates accent colors and default imagery based on the current month.
@@ -19,6 +22,11 @@ A sleek, **React-based calendar application** featuring seasonal themes, dual-vi
 - Week View: Switch to a time-blocked week view for granular hourly scheduling.
 - Holiday Integration: Automatic detection and display of fixed holidays.
 - Data Export: Generate and download a .txt report of all notes, events, and monthly summaries.
+
+## 🛠️ Tech Stack
+- React
+- Vite
+- CSS
 
 ## 🚀 Installation
 
