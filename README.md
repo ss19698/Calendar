@@ -1,4 +1,4 @@
-# Conceptly Calendar
+# Calendar
 
 A sleek, **React-based calendar application** featuring seasonal themes, dual-view scheduling, and full note-management capabilities.
 
