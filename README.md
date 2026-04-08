@@ -2,6 +2,24 @@
 
 A sleek, **React-based calendar application** featuring seasonal themes, dual-view scheduling, and full note-management capabilities.
 
+## ✨ Key Features
+### 🎨 Visuals & Customization
+- Seasonal Themes: Automatically updates accent colors and default imagery based on the current month.
+- Image Upload: Supports custom background images for each month via a local file picker.
+- Dark/Light Mode: A fully integrated theme system with persistent state and smooth transitions.
+- Responsive Design: Mobile-friendly layouts with custom scrollbars and touch-optimized interactions.
+
+### 📝 Note & Event Tracking
+- Dual Modal System: Create either a Note (with emoji and color selection) or an Event (with time and location).
+- General Monthly Notes: A dedicated text area for high-level monthly goals or scratchpad info.
+- Search Functionality: Real-time filtering of pinned notes to quickly find past or future entries.
+- Range Selection: Visual date-range selection with a duration counter (e.g., "5d").
+
+### 🛠️ Advanced Tools
+- Week View: Switch to a time-blocked week view for granular hourly scheduling.
+- Holiday Integration: Automatic detection and display of fixed holidays.
+- Data Export: Generate and download a .txt report of all notes, events, and monthly summaries.
+
 ## 🚀 Installation
 
 ```bash

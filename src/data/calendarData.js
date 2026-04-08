@@ -21,9 +21,42 @@ export const MONTH_DATA = [
 ];
 
 export const HOLIDAYS_MAP = {
-  "01-01":"New Year's Day","01-14":"Makar Sankranti","01-26":"Republic Day",
-  "03-08":"Holi","04-14":"Dr. Ambedkar Jayanti","05-01":"Labour Day",
-  "08-15":"Independence Day","10-02":"Gandhi Jayanti","11-01":"Diwali","12-25":"Christmas",
+  // January
+  "01-01": "New Year's Day",
+  "01-14": "Makar Sankranti / Pongal",
+  "01-23": "Netaji Subhash Chandra Bose Jayanti",
+  "01-26": "Republic Day",
+
+  // February
+  "02-14": "Valentine's Day",
+
+  // March & April
+  "03-08": "International Women's Day",
+  "04-14": "Dr. Ambedkar Jayanti / Baisakhi",
+
+  // May & June
+  "05-01": "May Day / Maharashtra Day / Gujarat Day",
+  "06-05": "World Environment Day",
+  "06-21": "International Yoga Day",
+
+  // August
+  "08-15": "Independence Day",
+
+  // September
+  "09-05": "Teachers' Day",
+
+  // October
+  "10-02": "Gandhi Jayanti",
+  "10-31": "National Unity Day (Sardar Patel Jayanti)",
+
+  // November
+  "11-01": "Karnataka Rajyotsava / Haryana Day",
+  "11-14": "Children's Day",
+
+  // December
+  "12-04": "Indian Navy Day",
+  "12-25": "Christmas",
+  "12-26": "Boxing Day"
 };
 
 export const NOTE_EMOJIS  = ["📌","⭐","🔥","💡","🎯","📅","🏖️","✈️","🎉","💼","❤️","🌿","🎂","⚡","🌅"];

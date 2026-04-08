@@ -88,6 +88,7 @@ export function MonthGrid({
               {/* Day circle */}
               <button
                 className="day-btn relative z-10 flex items-center justify-center rounded-full text-sm"
+                
                 style={{
                   width: 34, height: 34,
                   background: isEdge ? accent : isToday ? `rgba(${rgb},.15)` : "transparent",
