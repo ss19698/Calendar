@@ -366,7 +366,7 @@ function clickDay(day) {
                 />
               </div>
 
-              <div className="flex-1 overflow-y-auto pr-1 space-y-2 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto pr-1 space-y-2 custom-scrollbar" style={{ maxHeight: '150px' }}>
                 <style>{`
                   .custom-scrollbar::-webkit-scrollbar { width: 4px; }
                   .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
