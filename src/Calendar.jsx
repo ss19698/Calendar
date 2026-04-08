@@ -44,7 +44,7 @@ export default function Calendar() {
   const [evtColor,    setEvtColor]    = useState("#3B82F6");
   const [isEditNote,  setIsEditNote]  = useState(false);
 
-  const mk      = `${year}-${month}`;
+  const mk    = `${year}-${month}`;
   const data    = MONTH_DATA[month];
   const accent  = data.accent;
   const rgb     = hexRgb(accent);
@@ -83,7 +83,11 @@ export default function Calendar() {
       setRangeStart(k); setRangeEnd(null);
     } else {
       const s = parseKey(rangeStart), c = parseKey(k);
-      if (c.getTime() === s.getTime()) { setRangeStart(null); return; }
+      if (c.getTime() === s.getTime()) { 
+        // Second click on same day opens modal (Mobile Friendly)
+        openNoteFor(k);
+        return; 
+      }
       if (c < s) { setRangeEnd(rangeStart); setRangeStart(k); }
       else        { setRangeEnd(k); }
     }
@@ -133,19 +137,12 @@ export default function Calendar() {
     Object.entries(notes).sort(([a],[b])=>a.localeCompare(b)).forEach(([k,n]) => {
       out += `${fmtDate(k)} ${n.emoji} ${n.text}\n`;
     });
-    if (Object.keys(events).length) {
-      out += `\n--- Events ---\n`;
-      Object.entries(events).sort(([a],[b])=>a.localeCompare(b)).forEach(([k,evts]) => {
-        evts.forEach(ev => { out += `${fmtDate(k)} ${ev.startTime}-${ev.endTime}  ${ev.title}${ev.location?` @ ${ev.location}`:""}\n`; });
-      });
-    }
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([out],{type:"text/plain"}));
     a.download = `calendar-notes-${year}-${String(month+1).padStart(2,"0")}.txt`;
     a.click();
   }
 
-  // ── Week view helpers ────────────────────────────────────────────────────────
   function getWeekDays() {
     const fd  = getFirstDow(year, month);
     const ws  = new Date(year, month, 1 - fd);
@@ -153,7 +150,6 @@ export default function Calendar() {
     return Array.from({ length: 7 }, (_, i) => { const d = new Date(ws); d.setDate(d.getDate() + i); return d; });
   }
 
-  // ── Holidays for this month ──────────────────────────────────────────────────
   const monthHolidays = Object.entries(HOLIDAYS_MAP)
     .filter(([k]) => parseInt(k.split("-")[0]) - 1 === month)
     .map(([k, name]) => ({ day: parseInt(k.split("-")[1]), name }));
@@ -167,7 +163,6 @@ export default function Calendar() {
 
   const rangeCount = rangeStart && rangeEnd ? daysBetween(rangeStart, rangeEnd) : null;
 
-  // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <div
       className="min-h-screen flex items-start justify-center p-3 sm:p-5 transition-colors duration-500"
@@ -178,7 +173,6 @@ export default function Calendar() {
           : "linear-gradient(135deg,#ececec 0%,#e0dff0 100%)",
       }}
     >
-      {/* ── Card ── */}
       <div
         className="w-full rounded-3xl overflow-hidden m-auto"
         style={{
@@ -189,12 +183,11 @@ export default function Calendar() {
             : `0 30px 80px rgba(0,0,0,.14), 0 0 0 1px rgba(0,0,0,.04)`,
         }}
       >
-        {/* Spiral holes decoration */}
-        <div className="flex justify-center items-center gap-3 py-2.5"
+        {/* Spiral decoration */}
+        <div className="flex justify-center items-center gap-3 py-2.5 pointer-events-none"
           style={{ background: dark ? "#07070f" : "#d9d9d9" }}>
           {Array.from({ length: 18 }).map((_, i) => (
-            <div key={i} className="rounded-full" style={{
-              width: 17, height: 13,
+            <div key={i} className="rounded-full w-[17px] h-[13px]" style={{
               background: dark ? "#1e1e30" : "#bbb",
               border: `2px solid ${dark ? "#2a2a40" : "#aaa"}`,
               boxShadow: "inset 0 1px 3px rgba(0,0,0,.3)",
@@ -202,9 +195,7 @@ export default function Calendar() {
           ))}
         </div>
 
-        <div className="card-body flex flex-col" style={{ height: "auto", minHeight: 500, maxHeight: 650 }}>
-
-          {/* ── Left: Image panel ── */}
+        <div className="card-body flex flex-col md:flex-row" style={{ minHeight: 600 }}>
           <ImagePanel
             imgSrc={imgSrc} imgOk={imgOk} setImgOk={setImgOk}
             dark={dark} data={data} year={year} month={month}
@@ -212,66 +203,34 @@ export default function Calendar() {
             onUpload={handleImgUpload}
           />
 
-          {/* ── Right: Calendar panel ── */}
-          <div
-            className="flex-1 flex flex-col min-w-0 overflow-hidden"
-            style={{ padding: "18px 20px 16px", color: dark ? "#e0e0e0" : "#1a1a1a" }}
-          >
-            {/* Toolbar */}
+          <div className="flex-1 flex flex-col min-w-0 overflow-hidden p-4 md:p-6" style={{ color: dark ? "#e0e0e0" : "#1a1a1a" }}>
             <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
               <div className="flex items-center gap-2">
                 <SmallBtn onClick={goToday} accent={accent} rgb={rgb}>Today</SmallBtn>
                 {thisMonthNoteCount > 0 && (
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                     style={{ background: `rgba(${rgb},.12)`, color: accent }}>
                     {thisMonthNoteCount} note{thisMonthNoteCount > 1 ? "s" : ""}
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                {/* Search */}
-                <input
-                  type="text"
-                  placeholder="Search notes…"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className="text-xs rounded-full px-3 py-1.5 outline-none"
-                  style={{
-                    width: 120,
-                    background: dark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.04)",
-                    border: `1px solid rgba(${rgb},.2)`,
-                    color: dark ? "#ccc" : "#333",
-                    fontFamily: "'DM Sans',sans-serif",
-                  }}
-                />
-                {/* Month / Week toggle */}
-                <div className="flex rounded-full overflow-hidden" style={{ border: `1px solid rgba(${rgb},.25)` }}>
+              <div className="flex items-center gap-2">
+                <div className="flex rounded-full overflow-hidden border border-black/10 dark:border-white/10">
                   {["Month","Week"].map(v => (
-                    <button
-                      key={v}
-                      onClick={() => setView(v.toLowerCase())}
-                      className="text-xs font-semibold px-3 py-1.5 transition-all"
-                      style={{
-                        background: view === v.toLowerCase() ? accent : "transparent",
-                        color: view === v.toLowerCase() ? "#fff" : (dark ? "#666" : "#999"),
-                      }}
+                    <button key={v} onClick={() => setView(v.toLowerCase())}
+                      className={`text-xs font-semibold px-3 py-1.5 transition-all ${view === v.toLowerCase() ? "text-white" : "text-gray-400"}`}
+                      style={{ background: view === v.toLowerCase() ? accent : "transparent" }}
                     >{v}</button>
                   ))}
                 </div>
-                {/* Dark-mode toggle */}
-                <button
-                  onClick={() => setDark(d => !d)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm"
-                  style={{ background: `rgba(${rgb},.1)`, border: `1px solid rgba(${rgb},.2)` }}
-                  title="Toggle theme"
-                >{dark ? "☀️" : "🌙"}</button>
-                {/* Export */}
-                <SmallBtn onClick={exportNotes} accent={accent} rgb={rgb}>Export ↓</SmallBtn>
+                <button onClick={() => setDark(!dark)} className="w-8 h-8 rounded-full flex items-center justify-center text-sm bg-black/5 dark:bg-white/5">
+                  {dark ? "☀️" : "🌙"}
+                </button>
+                <SmallBtn onClick={exportNotes} accent={accent} rgb={rgb}>Export</SmallBtn>
               </div>
             </div>
 
-            {/* ── Month View ── */}
-            {view === "month" && (
+            {view === "month" ? (
               <MonthGrid
                 year={year} month={month} todayKey={todayKey}
                 accent={accent} rgb={rgb} dark={dark}
@@ -282,13 +241,9 @@ export default function Calendar() {
                 onDayDoubleClick={k => openNoteFor(k)}
                 animKey={animKey}
               />
-            )}
-
-            {/* ── Week View ── */}
-            {view === "week" && (
+            ) : (
               <WeekView
-                weekDays={getWeekDays()}
-                todayKey={todayKey}
+                weekDays={getWeekDays()} todayKey={todayKey}
                 accent={accent} rgb={rgb} dark={dark}
                 notes={notes} events={events}
                 onDayClick={d => openNoteFor(toKey(d.getFullYear(), d.getMonth(), d.getDate()))}
@@ -298,135 +253,47 @@ export default function Calendar() {
               />
             )}
 
-            {/* ── Range selection bar ── */}
             {rangeStart && (
-              <div className="mt-3 flex flex-wrap items-center gap-2 pill-in">
-                <div className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full"
-                  style={{ background: `rgba(${rgb},.1)`, color: accent, border: `1px solid rgba(${rgb},.2)` }}>
-                  📅 {fmtDate(rangeStart)}
-                  {rangeEnd && <><span style={{ opacity: .4 }}>→</span>{fmtDate(rangeEnd)}</>}
+              <div className="mt-4 flex flex-wrap items-center gap-2 animate-in slide-in-from-bottom-2">
+                <div className="text-xs font-semibold px-3 py-1.5 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10" style={{ color: accent }}>
+                  📅 {fmtDate(rangeStart)} {rangeEnd && `→ ${fmtDate(rangeEnd)}`}
                 </div>
-                {rangeCount && (
-                  <span className="text-xs font-bold px-2.5 py-1.5 rounded-full"
-                    style={{ background: `rgba(${rgb},.07)`, color: accent }}>
-                    {rangeCount}d
-                  </span>
-                )}
-                <button
-                  onClick={() => { setRangeStart(null); setRangeEnd(null); }}
-                  className="text-xs px-2.5 py-1.5 rounded-full transition-all"
-                  style={{ background: dark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.04)", color: dark ? "#666" : "#aaa" }}
-                >✕</button>
-                {rangeEnd && (
-                  <button
-                    onClick={() => openNoteFor(rangeStart)}
-                    className="text-xs font-semibold px-2.5 py-1.5 rounded-full text-white"
-                    style={{ background: accent, boxShadow: `0 3px 10px rgba(${rgb},.35)` }}
-                  >+ Note range</button>
-                )}
+                <button onClick={() => {setRangeStart(null); setRangeEnd(null)}} className="p-1.5 text-xs">✕</button>
+                <button onClick={() => openNoteFor(rangeStart)} className="text-xs font-bold px-4 py-1.5 rounded-full text-white" style={{ background: accent }}>
+                  {rangeEnd ? "+ Note Range" : "+ Add Note"}
+                </button>
               </div>
             )}
 
-            {/* ── Notes section ── */}
-            <div className="mt-4 pt-4 flex flex-col gap-3 flex-1 min-h-0" // min-h-0 is crucial for flex scrolling
-              style={{ 
-                borderTop: `1px solid ${dark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.07)"}`,
-                overflow: "hidden" // Prevents the parent from expanding
-              }}>
-              
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: dark ? "#444" : "#c0c0c0" }}>Notes & Events</span>
-                <span className="text-xs" style={{ color: dark ? "#3a3a4a" : "#ddd" }}>{filteredNotes.length} pinned</span>
-              </div>
-
-              {/* Month-level textarea (Static at top) */}
-              <div className="flex-shrink-0">
-                <NoteArea
-                  value={monthNotes[mk] || ""}
-                  onChange={v => setMonthNotes(n => ({ ...n, [mk]: v }))}
-                  placeholder={`General notes for ${MONTHS[month]}…`}
-                  accent={accent} rgb={rgb} dark={dark}
-                />
-              </div>
+            <div className="mt-6 pt-4 border-t border-black/5 dark:border-white/5 flex flex-col gap-3 flex-1 overflow-hidden">
+              <NoteArea
+                value={monthNotes[mk] || ""}
+                onChange={v => setMonthNotes(n => ({ ...n, [mk]: v }))}
+                placeholder={`General notes for ${MONTHS[month]}…`}
+                accent={accent} rgb={rgb} dark={dark}
+              />
 
               <div className="flex-1 overflow-y-auto pr-1 space-y-2 custom-scrollbar">
-                <style>{`
-                  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-                  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-                  .custom-scrollbar::-webkit-scrollbar-thumb { 
-                    background: ${dark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}; 
-                    border-radius: 10px; 
-                  }
-                `}</style>
-
-                {/* Pinned date notes */}
                 {filteredNotes.map(([k, n]) => (
-                  <div
-                    key={k}
-                    className="note-row flex items-start gap-2 text-xs rounded-lg px-2.5 py-2 transition-all relative"
-                    style={{
-                      background: dark ? "rgba(255,255,255,.025)" : "rgba(0,0,0,.02)",
-                      borderLeft: `3px solid ${n.color || accent}`,
-                    }}
-                  >
-                    <span style={{ fontSize: 14 }}>{n.emoji || "📌"}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold" style={{ color: n.color || accent }}>{fmtDate(k)}</div>
-                      <div className="truncate mt-0.5" style={{ color: dark ? "#ccc" : "#444" }}>{n.text}</div>
+                  <div key={k} className="group flex items-start gap-3 text-xs rounded-xl px-3 py-3 relative bg-black/[0.02] dark:bg-white/[0.03]"
+                    style={{ borderLeft: `4px solid ${n.color || accent}` }}>
+                    <span className="text-base">{n.emoji}</span>
+                    <div className="flex-1 pr-16">
+                      <div className="font-bold opacity-60">{fmtDate(k)}</div>
+                      <div className="mt-0.5">{n.text}</div>
                     </div>
-                    <div className="note-actions flex gap-1 absolute right-2 top-1/2 -translate-y-1/2">
-                      <button onClick={() => openNoteFor(k, true)} className="p-1 hover:opacity-70">✏️</button>
-                      <button onClick={() => deleteNote(k)} className="p-1 hover:opacity-70">✕</button>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => openNoteFor(k, true)} className="p-2 bg-black/5 dark:bg-white/10 rounded-lg">✏️</button>
+                      <button onClick={() => deleteNote(k)} className="p-2 bg-black/5 dark:bg-white/10 rounded-lg">✕</button>
                     </div>
                   </div>
                 ))}
-
-                {/* Upcoming events */}
-                {Object.entries(events).filter(([k]) => !search).map(([k, evts]) =>
-                  evts.map((ev, idx) => (
-                    <div
-                      key={`${k}-${idx}`}
-                      className="note-row flex items-start gap-2 text-xs rounded-lg px-2.5 py-2 relative"
-                      style={{
-                        background: dark ? "rgba(255,255,255,.025)" : "rgba(0,0,0,.02)",
-                        borderLeft: `3px solid ${ev.color || "#818CF8"}`,
-                      }}
-                    >
-                      <span style={{ fontSize: 14 }}>📅</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold" style={{ color: ev.color || "#818CF8" }}>
-                          {fmtDate(k)} · {ev.startTime}
-                        </div>
-                        <div className="truncate mt-0.5" style={{ color: dark ? "#ccc" : "#444" }}>{ev.title}</div>
-                      </div>
-                      <button 
-                        onClick={() => deleteEvent(k, idx)}
-                        className="note-actions absolute right-2 top-1/2 -translate-y-1/2 p-1 text-red-400"
-                      >✕</button>
-                    </div>
-                  ))
-                )}
               </div>
-
-              {monthHolidays.length > 0 && (
-                <div className="mt-auto pt-2 flex-shrink-0"
-                  style={{ borderTop: `1px solid ${dark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.06)"}` }}>
-                  <div className="flex flex-wrap gap-1">
-                    {monthHolidays.map(h => (
-                      <div key={h.day} className="text-[10px] px-2 py-0.5 rounded-full opacity-70"
-                        style={{ background: `rgba(${rgb},.08)`, color: accent, border: `1px solid rgba(${rgb},.1)` }}>
-                        {h.day}: {h.name}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
-          </div>{/* end calendar panel */}
-        </div>{/* end card-body */}
-      </div>{/* end card */}
+          </div>
+        </div>
+      </div>
 
-      {/* ── Note / Event Modal ── */}
       {modalKey && (
         <NoteEventModal
           modalKey={modalKey} modalTab={modalTab} setModalTab={setModalTab}
@@ -436,7 +303,7 @@ export default function Calendar() {
           noteColor={noteColor} setNoteColor={setNoteColor}
           evtTitle={evtTitle} setEvtTitle={setEvtTitle}
           evtStart={evtStart} setEvtStart={setEvtStart}
-          evtEnd={evtEnd}     setEvtEnd={setEvtEnd}
+          evtEnd={evtEnd} setEvtEnd={setEvtEnd}
           evtLocation={evtLocation} setEvtLocation={setEvtLocation}
           evtColor={evtColor} setEvtColor={setEvtColor}
           isEditNote={isEditNote}
