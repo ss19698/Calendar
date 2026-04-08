@@ -93,7 +93,6 @@ export function WeekView({
             {weekDays.map((d, i) => (
               <div 
                 key={i} 
-                // UPDATED: Now passing the hour 'h' so the parent can set the start time
                 onClick={() => onEventClick(d, h)} 
                 className="flex-1 border-l hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors cursor-text"
                 style={{ borderColor: dark ? "rgba(255,255,255,.025)" : "rgba(0,0,0,.03)" }}
