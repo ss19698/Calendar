@@ -1,0 +1,57 @@
+@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+.cal-anim  { animation: gridIn .22s cubic-bezier(.4,0,.2,1); }
+@keyframes gridIn { from{opacity:0;transform:translateY(8px) scale(.99)} to{opacity:1;transform:none} }
+.modal-anim{ animation: mIn .22s cubic-bezier(.34,1.56,.64,1); }
+@keyframes mIn { from{opacity:0;transform:scale(.9) translateY(20px)} to{opacity:1;transform:none} }
+.notedot   { animation: dotPop .18s cubic-bezier(.34,1.56,.64,1); }
+@keyframes dotPop { from{transform:scale(0)} to{transform:scale(1)} }
+.img-reveal{ animation: imgReveal .7s ease; }
+@keyframes imgReveal { from{opacity:0;transform:scale(1.05)} to{opacity:1;transform:none} }
+.pill-in   { animation: pillIn .18s ease; }
+@keyframes pillIn { from{opacity:0;transform:scaleX(.8)} to{opacity:1;transform:none} }
+
+/* ── Day button ── */
+.day-btn { transition: transform .12s, box-shadow .12s; cursor:pointer; }
+.day-btn:hover { transform:scale(1.18); z-index:10; }
+.day-btn:active{ transform:scale(.94); }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-thumb { border-radius:3px; }
+
+/* ── Hover-reveal note actions ── */
+.note-row .note-actions { display:none; }
+.note-row:hover .note-actions { display:flex; }
+
+@media (min-width: 1024px) {
+  .card-body   { flex-direction: row !important; }
+  .img-panel-outer {
+    width: 300px !important;
+    min-height: unset !important;  
+    align-self: stretch;
+  }
+  .diagonal-bleed { display: block !important; }
+}
+@media (max-width: 1023px) {
+  .diagonal-bleed { display: none !important; }
+}
+@media (min-width: 1024px) {
+  .img-panel-outer {
+    width: 300px;
+    flex-shrink: 0;
+    min-height: unset;
+    align-self: stretch;
+  }
+}
